@@ -10,12 +10,15 @@ import {
   selector: 'chat',
   template: `
     <h1>chat on</h1>
-    <input type="text" [(ngModel)]="msg" (keyup.enter)="go(msg)"/>
-    <button type="submit" (submit)="go(msg)">go</button>
+    <form (submit)="go(msg)">
+      <input type="text" [(ngModel)]="msg"/>
+      <button type="submit">go</button>
+    </form>
+
 
     <div>
       <ul>
-        <li *ngFor="#m of msgs">{{m}}</li>
+        <li *ngFor="#m of msgs">{{m.message}}</li>
       </ul>
     </div>
   `
@@ -25,14 +28,22 @@ class Chat implements OnInit {
   msgs: string[] = [];
   ws: WebSocket;
 
+  private _addMsg(msg: string) {
+    this.msgs.push(JSON.parse(msg));
+  }
+
   ngOnInit() {
-    this.ws = new WebSocket('ws://localhost:3333');
+    this.ws = new WebSocket('ws://localhost:3333/socket');
+
+    this.ws.onmessage = ({data}) => {
+      this._addMsg(data);
+    }
   }
 
   go(msg: string) {
-    console.log(msg);
-
-    this.ws.send(msg);
+    let _msgStringified = JSON.stringify({message: msg});
+    this.ws.send(_msgStringified);
+    this.msg = '';
   }
 }
 

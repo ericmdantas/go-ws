@@ -4,67 +4,61 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"net/url"
-	"time"
 
-	ws "github.com/gorilla/websocket"
+	"golang.org/x/net/websocket"
 )
 
-func initWs() {
-	fmt.Println("ws on")
+type message struct {
+	Message string `json:"message"`
+}
 
-	u := url.URL{Scheme: "ws", Host: "localhost:3333", Path: "/"}
+type clManager struct {
+	clients []*websocket.Conn
+}
 
-	c, _, err := ws.DefaultDialer.Dial(u.String(), nil)
-
-	if err != nil {
-		log.Fatal("dial error:", err)
+func (cl *clManager) add(client *websocket.Conn) {
+	if len(cl.clients) == 0 {
+		cl.clients = append(cl.clients, client)
+		return
 	}
 
-	defer c.Close()
-
-	done := make(chan struct{})
-
-	go func() {
-		defer c.Close()
-		defer close(done)
-
-		for {
-			_, message, err := c.ReadMessage()
-
-			if err != nil {
-				log.Println("read:", err)
-				return
-			}
-
-			log.Println("recv: %s", message)
-		}
-	}()
-
-	ticker := time.NewTicker(time.Second)
-	defer ticker.Stop()
-
-	for {
-		select {
-		case t := <-ticker.C:
-			err := c.WriteMessage(ws.TextMessage, []byte(t.String()))
-
-			if err != nil {
-				log.Println("write:", err)
-				return
-			}
+	for _, v := range cl.clients {
+		if client != v {
+			cl.clients = append(cl.clients, client)
 		}
 	}
 }
 
-func initHTTP() {
-	fmt.Println("http on")
+func (cl *clManager) broadcast(msg message) {
+	for _, v := range cl.clients {
+		websocket.JSON.Send(v, msg)
+	}
+}
 
-	http.Handle("/", http.FileServer(http.Dir("./")))
-	log.Fatal(http.ListenAndServe(":3333", nil))
+var cl = new(clManager)
+
+func socketFn(client *websocket.Conn) {
+	cl.add(client)
+
+	for {
+		var m message
+
+		if err := websocket.JSON.Receive(client, &m); err != nil {
+			log.Println(err)
+			break
+		}
+
+		cl.broadcast(message{m.Message})
+	}
 }
 
 func main() {
-	initWs()
-	initHTTP()
+	port := ":3333"
+
+	http.Handle("/", http.FileServer(http.Dir(".")))
+	http.Handle("/socket", websocket.Handler(socketFn))
+
+	fmt.Println(port)
+
+	http.ListenAndServe(port, nil)
 }
