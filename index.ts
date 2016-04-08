@@ -9,7 +9,7 @@ import {
 @Component({
   selector: 'chat',
   template: `
-    <h1>chat on</h1>
+    <h1>!</h1>
     <form (submit)="go(msg)">
       <input type="text" [(ngModel)]="msg"/>
       <button type="submit">go</button>
