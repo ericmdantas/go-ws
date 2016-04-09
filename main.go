@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 
@@ -35,6 +36,14 @@ func (cl *clManager) broadcast(msg message) {
 	}
 }
 
+func (cl *clManager) remove(client *websocket.Conn) {
+	for i, v := range cl.clients {
+		if v == client {
+			cl.clients = append(cl.clients[:i], cl.clients[i+1:]...)
+		}
+	}
+}
+
 var cl = new(clManager)
 
 func socketFn(client *websocket.Conn) {
@@ -45,6 +54,11 @@ func socketFn(client *websocket.Conn) {
 
 		if err := websocket.JSON.Receive(client, &m); err != nil {
 			log.Println(err)
+
+			if err == io.EOF {
+				cl.remove(client)
+			}
+
 			break
 		}
 
