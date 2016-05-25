@@ -1,17 +1,25 @@
 <!doctype html>
 <html>
   <head>
-    <base href="/" />
+    <title>ws</title>
   </head>
 
   <body>
-    <chat></chat>
+    <p id="msg"></p>
 
-    <script src="node_modules/systemjs/dist/system.js"></script>
-    <script src="node_modules/angular2/bundles/angular2-polyfills.js"></script>
-    <script src="node_modules/angular2/bundles/angular2.js"></script>
-    <script src="node_modules/rxjs/bundles/Rx.js"></script>
+    <script>
+      var ws = new WebSocket("ws://localhost:3333/ws");
+      var count = 0;
 
-    <script>System.import('index.js')</script>
+      ws.onmessage = function(event) {
+        document.getElementById("msg").innerText += " - " + JSON.parse(event.data).msg;
+
+        if (!!count && (count % 100)) {
+          document.getElementById("msg").innerText = "";
+        }
+
+        count++
+      }
+    </script>
   </body>
 </html>
