@@ -8,18 +8,7 @@
     <p id="msg"></p>
 
     <script>
-      var ws = new WebSocket("ws://localhost:3333/ws");
-      var count = 0;
 
-      ws.onmessage = function(event) {
-        document.getElementById("msg").innerText += " - " + JSON.parse(event.data).msg;
-
-        if (!!count && (count % 100)) {
-          document.getElementById("msg").innerText = "";
-        }
-
-        count++
-      }
     </script>
   </body>
 </html>
