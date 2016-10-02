@@ -5,10 +5,18 @@
   </head>
 
   <body>
-    <p id="msg"></p>
+    <h1 id="msg">!</h1>
 
     <script>
+      ;(function() {
+        "use strict";
 
+        let ws = new WebSocket('ws://localhost:1234/echo');
+
+        ws.onmessage = function(ev) {
+          document.getElementById("msg").innerHTML = ev.data;
+        };
+      }());
     </script>
   </body>
 </html>
