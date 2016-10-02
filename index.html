@@ -16,6 +16,15 @@
         ws.onmessage = function(ev) {
           document.getElementById("msg").innerHTML = ev.data;
         };
+
+        setInterval(() => {
+          ws.send(JSON.stringify({
+            type: 'axz', 
+            data: {
+              msg: "123!!!"
+            }
+          }))
+        }, 333);
       }());
     </script>
   </body>
