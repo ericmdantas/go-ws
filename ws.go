@@ -1,19 +1,19 @@
 package main
 
 import (
+	c "crypto/md5"
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"golang.org/x/net/websocket"
 )
 
 type msg struct {
-	Type      string `json:"type"`
-	CreatedAt string `json:"createdAt"`
-	Hash      string `json:"hash"`
-	Data      struct {
-		Msg string `json:"msg"`
+	Type string `json:"type"`
+	Hash []byte `json:"hash"`
+	Data struct {
+		CreatedAt int64  `json:"createdAt"`
+		Msg       string `json:"msg"`
 	} `json:"data"`
 }
 
@@ -27,9 +27,12 @@ func main() {
 
 			websocket.Message.Receive(conn, &b)
 
+			hasher := c.New()
+			hasher.Write(b)
+
 			json.Unmarshal(b, &m)
 
-			fmt.Println(m)
+			m.Hash = hasher.Sum(nil)
 
 			bm, _ := json.Marshal(m)
 
