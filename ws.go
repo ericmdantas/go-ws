@@ -9,8 +9,10 @@ import (
 )
 
 type msg struct {
-	Type string `json:"type"`
-	Data struct {
+	Type      string `json:"type"`
+	CreatedAt string `json:"createdAt"`
+	Hash      string `json:"hash"`
+	Data      struct {
 		Msg string `json:"msg"`
 	} `json:"data"`
 }

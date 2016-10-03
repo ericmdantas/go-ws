@@ -5,7 +5,9 @@
   </head>
 
   <body>
-    <h1 id="msg">!</h1>
+    <h1 id="msg-1">!</h1>
+    <h1 id="msg-2">!</h1>
+    <h1 id="msg-3">!</h1>
 
     <script>
       ;(function() {
@@ -14,17 +16,46 @@
         let ws = new WebSocket('ws://localhost:1234/echo');
 
         ws.onmessage = function(ev) {
-          document.getElementById("msg").innerHTML = ev.data;
+          let _r = "";
+          let _parsed = JSON.parse(ev.data);
+
+          switch(_parsed.type) {
+            case "abc": document.getElementById('msg-1').innerHTML = ev.data; break;  
+            case "def": document.getElementById('msg-2').innerHTML = ev.data; break;  
+            case "ghi": document.getElementById('msg-3').innerHTML = ev.data; break;  
+          }
         };
 
         setInterval(() => {
           ws.send(JSON.stringify({
-            type: 'axz', 
+            type: 'abc', 
             data: {
-              msg: "123!!!"
+              msg: "123!!!",
+              createdAt: Date.now()
             }
           }))
         }, 333);
+
+        setInterval(() => {
+          ws.send(JSON.stringify({
+            type: 'def', 
+            data: {
+              msg: "456!!!",
+              createdAt: Date.now()
+            }
+          }))
+        }, 333);
+
+        setInterval(() => {
+          ws.send(JSON.stringify({
+            type: 'ghi', 
+            data: {
+              msg: "789!!!",
+              createdAt: Date.now()
+            }
+          }))
+        }, 333);
+
       }());
     </script>
   </body>
